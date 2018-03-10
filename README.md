@@ -1,8 +1,10 @@
 # Coach.js
 
-A clean language coach in ES6.
+A clean language coach in Javascript.
 
 ## Usage
+
+Coach.js currently requires [Compromise](http://compromise.cool/) for PoS tagging.
 
 In your HTML, scripts need to be loaded in this order:
 ```html
@@ -48,6 +50,8 @@ return output
 ```
 
 ## License
-GNU GENERAL PUBLIC LICENSE Version 3
+Coach.js is made available under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3
 
-See LICENSE
+(C) P. Hughes 2017-18. All rights reserved.
+
+See LICENSE file for full license text
