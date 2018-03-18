@@ -1,6 +1,6 @@
 # Coach.js
 
-A clean language coach in Javascript.
+A clean language coach in ES6.
 
 ## Usage
 
