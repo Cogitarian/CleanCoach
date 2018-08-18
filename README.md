@@ -1,27 +1,42 @@
-# Coach.js
+# CleanCoach
 
-A clean language coach in ES6.
+CleanCoach is a clean language coaching bot written in ES6.
 
-## Usage
+## Node Usage
+CleanCoach can be required just like any other node module.
 
-Coach.js currently requires [Compromise](http://compromise.cool/) for PoS tagging.
+```javascript
+const Coach = require('CleanCoach');
+const clive = new Coach("Clive"); // you can give the coach a custom name here
 
-In your HTML, scripts need to be loaded in this order:
-```html
-<script src="https://unpkg.com/compromise@latest/builds/compromise.min.js"></script>
-<script src="js/coach.js"></script>
-<script src="js/main.js"></script>
+let response = clive.getResponse("user input here");
+console.log(response);
 ```
+
+## CLI
+```bash
+npm install -g
+```
+will install a command-line interface called 'cleancoach' which can be used in your terminal.
+
+## Browser Usage
+You can browserify the node module by doing:
+```bash
+npm run build
+```
+which will create a standalone coach.js file in the 'dist' folder.
 
 In your main.js:
 ```javascript
 const coach = new Coach("Clive"); // You can give your coach a name here
 
 // configurable options
-coach.debug = false; // prints debug info to console
-coach.quoteUser = true; // puts quote marks around user input
-coach.trimFirstAnd = false; // remove the first "and" from the response
-coach.trimSecondAnd = false; // remove the second "and" from the response
+coach.options.debug = false; // prints debug info to console
+coach.options.maxDepth = 3; // maximum iterations to hold on to a topic
+coach.options.quoteUser = true; // puts quote marks around user input
+coach.options.removeSW = false; // remove stop-words when tokenising
+coach.options.trimFirstAnd = false; // remove "and" from the reflective statement
+coach.options.trimSecondAnd = false; // remove "and" from the response question
 
 // define a standard response in case of error
 let output = "Sorry, I didn't understand that. Try again."
@@ -34,24 +49,24 @@ coach.getResponse(string)
             output = response.reply;
         } else if (response.danger) {
             // input contained a danger word (e.g. "suicide")
-            output = response.danger;
-            // do some danger handling here (e.g. prompt with hotline number)
+             // do some danger handling here (e.g. prompt with hotline number)
+            output = response.reply;
         } else if (response.final) {
             // input contained a 'final' word (e.g. "goodbye")
-            output = response.final;
             // do some final handling here (e.g. promt with save dialogue)
             coach.reset(); // resets the coach to new state
         }
     }
     .catch(error) {
         console.error(error);
+        coach.reset(); // resets the coach to new state
     }
 return output
 ```
 
 ## License
-Coach.js is made available under the GNU AFFERO GENERAL PUBLIC LICENSE Version 3
+CleanCoach is made available under the [GNU AFFERO GENERAL PUBLIC LICENSE Version 3](https://www.gnu.org/licenses/agpl-3.0.en.html)
 
-(C) P. Hughes 2017-18. All rights reserved.
+(C) [P. Hughes](https://www.phugh.es) 2017-18. All rights reserved.
 
 See LICENSE file for full license text

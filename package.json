@@ -1,0 +1,40 @@
+{
+  "name": "cleancoach",
+  "version": "0.1.0",
+  "description": "A clean language coach in ES6.",
+  "main": "index.js",
+  "keywords": [
+    "clean language",
+    "coach",
+    "coaching",
+    "chatbot",
+    "bot"
+  ],
+  "author": "P. Hughes <peter@phugh.es> (http://www.phugh.es)",
+  "license": "AGPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phugh/coach.js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/phugh/coach.js/issues"
+  },
+  "homepage": "https://github.com/phugh/coach.js#readme",
+  "dependencies": {
+    "affectimo": "^3.1.0",
+    "compromise": "^11.12.0",
+    "darktriad": "^3.1.1",
+    "moment": "^2.22.2",
+    "optimismo": "^0.4.1",
+    "predictage": "^3.1.0",
+    "predictgender": "^3.0.0",
+    "prospectimo": "^3.0.0",
+    "wellbeing_analysis": "^3.1.0"
+  },
+  "bin": {
+    "cleancoach": "./cli.js"
+  },
+  "scripts": {
+    "build": "browserify index.js -s Coach -o ./dist/coach.js"
+  }
+}

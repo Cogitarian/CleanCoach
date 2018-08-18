@@ -1,9 +1,11 @@
 ### Project Specific Ignores
-node_modules/
-*.json
-*.log
 private/
+node_modules/
+.vscode/*
+*.log
+*.json
 !package.json
+!package-lock.json
 
 ### Ignore OS X Files
 *.DS_Store
