@@ -1,6 +1,6 @@
 {
   "name": "cleancoach",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A clean language coach in ES6.",
   "main": "index.js",
   "keywords": [
@@ -35,6 +35,7 @@
     "cleancoach": "./cli.js"
   },
   "scripts": {
-    "build": "browserify index.js -s Coach -o ./dist/coach.js"
+    "build": "browserify index.js -s Coach -o ./dist/coach.js",
+    "test": "node cli.js"
   }
 }
