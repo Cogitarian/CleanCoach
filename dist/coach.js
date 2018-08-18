@@ -284,7 +284,7 @@ module.exports = require('./lib/coach.js');
 
 (function() {
     'use strict';
-    const version = '0.1.0';
+    const version = '0.1.2';
     const functions = require('./functions.js');
     const language = require('./language.js');
     const moment = require('moment');
@@ -315,15 +315,14 @@ module.exports = require('./lib/coach.js');
 
     Coach.prototype.reset = function() {
         this.info = {
-            danger: false,      // user has mentioned a 'danger' word
             depth: 0,           // current issue depth (0-3)
             depthIssue: null,   // current 'deep' issue
             firstIssue: null,   // user's first response to 'WWYLTHH'
-            final: false,       // user has mentioned 'final' word
             iteration: 0,       // current response loop    
             lastCategory: null, // previously selected response category   
             lastIssue: null,    // user's previous item
             lastQuestion: null, // previously selected question
+            sessions: 0,
             sessionStartTime: moment().format('HH:mm:ss'),  
             sessionRunTime: 0,
         };
@@ -356,6 +355,7 @@ module.exports = require('./lib/coach.js');
 
     Coach.prototype.getProfile = function() {
         const profile = {
+            sessions: this.info.sessions,
             iterations: this.info.iteration,
             sessionStartTime: this.info.sessionStartTime,
             sessionRunTime: this.info.sessionRunTime,
@@ -383,6 +383,24 @@ module.exports = require('./lib/coach.js');
             if (!data.stats.hasOwnProperty(i)) continue;
             this.profile[i].push(data.stats[i]);
         }
+    };
+
+    Coach.prototype.newSession = function() {
+        // reset info but don't reset profile
+        let s = this.info.sessions += 1;
+        delete this.info;
+        this.info = {
+            depth: 0,           // current issue depth
+            depthIssue: null,   // current 'deep' issue
+            firstIssue: null,   // user's first response to 'WWYLTHH'
+            iteration: 0,       // current response loop    
+            lastCategory: null, // previously selected response category   
+            lastIssue: null,    // user's previous item
+            lastQuestion: null, // previously selected question
+            sessions: s,
+            sessionStartTime: moment().format('HH:mm:ss'),  
+            sessionRunTime: 0,
+        };
     };
 
     Coach.prototype.getResponse = function(str) {
@@ -437,16 +455,12 @@ module.exports = require('./lib/coach.js');
         const tokens = functions.tokenise(cleanStr, this.options.removeSW);
 
         // get string info
-        const strData = functions.getStrData(this.info.iteration, 
-                this.info.depth, str, cleanStr, tokens, this.info.lastCategory,
-                this.info.lastQuestion);
+        const strData = functions.getStrData(this.info.sessions, 
+                this.info.iteration, this.info.depth, str, cleanStr, tokens,
+                this.info.lastCategory, this.info.lastQuestion);
 
         // detect special circumstances (i.e. danger / finals)
         const specials = functions.detectSpecial(tokens);
-        if (specials) {
-            if (specials.danger) this.info.danger = true;
-            if (specials.final) this.info.final = true;
-        }
         
         // create reflective statement
         let reflection;
@@ -454,14 +468,16 @@ module.exports = require('./lib/coach.js');
        
         // create response question
         const qReply = functions.getQuestion(tokens, cleanStr, strData, 
-                this.info.depth, this.info.depthIssue, this.options);
+                this.info.depth, this.info.depthIssue, this.info.lastQuestion, 
+                this.options);
         let question = qReply[0];
 
         // update conversation profile
         this.info.lastQuestion = qReply[1][0];
         this.info.lastCategory = qReply[2];
         this.info.lastIssue = [qReply[3], qReply[4]];
-        if (this.info.iteration <= 1) {
+        // @todo improve this
+        if (!this.info.firstIssue) {
             this.info.firstIssue = this.info.lastIssue;
         }
         if (this.info.depth === 0 || !this.info.depthIssue) {
@@ -484,6 +500,8 @@ module.exports = require('./lib/coach.js');
         if (reflection) reply = reflection + ', ' + question;
         return {
             data: strData,
+            danger: specials.danger,
+            final: specials.final,
             reflection: reflection,
             question: question,
             reply: reply,
@@ -573,13 +591,16 @@ module.exports = require('./lib/coach.js');
      * @param  {Object} data      string data
      * @param  {Number} depth     current issue depth
      * @param  {Array} depthIssue array of current depth issue
+     * @param  {string} prev      previous question
      * @param  {Object} opts      coach options object
      * @return {Array} [modded question, question, category, X, Y]
      */
-    function getQuestion(tokens, cleanStr, data, depth, depthIssue, opts) {
+    function getQuestion(
+            tokens, cleanStr, data, depth, depthIssue, prev, opts) {
         // default response question
         let question = 'and what would you like to have happen?';
         let category = 'unknown';
+        if (depthIssue) depthIssue = filterFalsey(depthIssue);
 
         /**
          * @function chooseQuestion
@@ -588,18 +609,18 @@ module.exports = require('./lib/coach.js');
          * @return {Array} [question, category]
          */
         function chooseQuestion(arr, prev) {
-            // let i = 0;
+            let i = 0;
             let pot = chooseRandom(arr);
             let item = chooseRandom(questions.cleanQuestions[pot]);
             let question = item[0];
             let category = item[1];
-            /* while (question === prev && i < 10) {
-                i++;
+            while (question === prev && i < 10) {
+                i += 1;
                 pot = chooseRandom(arr);
                 item = chooseRandom(questions.cleanQuestions[pot]);
                 question = item[0];
                 category = item[1];           
-            } */
+            }
             return [question, category];
         }
 
@@ -635,12 +656,13 @@ module.exports = require('./lib/coach.js');
         if (data.pos.nouns.length > 0) {
             if (data.pos.nouns.length > 1) {
                 question = chooseQuestion(['NONES', 'GENERIC_QS', 'X_QS', 
-                        'XY_QS', 'X_QS', 'XY_QS']);
+                        'XY_QS', 'X_QS', 'XY_QS'], prev);
                 items = chooseItems(data.pos.nouns, depthIssue);
                 X = items.X;
                 Y = items.Y;
             } else {
-                question = chooseQuestion(['NONES', 'GENERIC_QS', 'X_QS']);
+                question = 
+                        chooseQuestion(['NONES', 'GENERIC_QS', 'X_QS'], prev);
                 X = chooseItems(
                         [...data.pos.nouns, ...data.pos.adjectives], 
                         depthIssue).X;
@@ -648,34 +670,33 @@ module.exports = require('./lib/coach.js');
         } else if (data.pos.adjectives.length > 0) {
             if (data.pos.verbs.length > 0) {
                 question = chooseQuestion(['NONES', 'GENERIC_QS', 'X_QS', 
-                        'XY_QS', 'X_QS']);
+                        'XY_QS', 'X_QS'], prev);
                 items = chooseItems(
                         [...data.pos.verbs, ...data.pos.adjectives], 
                         depthIssue);
                 X = items.X;
                 Y = items.Y;
             } else {
-                question = chooseQuestion(['NONES', 'GENERIC_QS', 'X_QS']);
+                question = 
+                        chooseQuestion(['NONES', 'GENERIC_QS', 'X_QS'], prev);
                 items = chooseItems(data.pos.adjectives, depthIssue);
                 X = items.X;
                 Y = items.Y;
             }
         } else if (data.pos.verbs.length > 0) {
-            question = chooseQuestion(['NONES', 'GENERIC_QS', 'X_QS']);
-            items = chooseItems(data.pos.VERBS, depthIssue);
-            X = items.X;
-            Y = items.Y;
+            question = chooseQuestion(['NONES', 'GENERIC_QS', 'X_QS'], prev);
+            X = chooseItems(data.pos.verbs).X;
         } else if (data.pos.entities.length > 0) {
             question = chooseQuestion(['NONES', 'GENERIC_QS', 'NE_QS', 
-                    'NE_QS']);
+                    'NE_QS'], prev);
             X = chooseItems(data.pos.entities).X;
         } else {
             if (depthIssue) {
-                question = chooseQuestion(['NONES', 'X_QS', 'X_QS']);
+                question = chooseQuestion(['NONES', 'X_QS', 'X_QS'], prev);
                 X = chooseItems(depthIssue).X;
             } else {
                 // none of the above
-                question = chooseQuestion(['NONES']);
+                question = chooseQuestion(['NONES'], prev);
             }
         }
 
@@ -807,6 +828,7 @@ module.exports = require('./lib/coach.js');
 
     /**
      * @function getStrData
+     * @param  {Number} session  session number
      * @param  {Number} i        iteration
      * @param  {Number} depth    {description}
      * @param  {string} str      {description}
@@ -816,7 +838,7 @@ module.exports = require('./lib/coach.js');
      * @param  {string} question {description}
      * @return {Object} {description}
      */
-    function getStrData(i, depth, str, cleanStr, tokens, category, question) {
+    function getStrData(session, i, depth, str, cleanStr, tokens, category, question) {
         const opts = {logs: 0, places: 4};
 
         const af = affect(str, opts);
@@ -825,14 +847,16 @@ module.exports = require('./lib/coach.js');
         const wb = wellbeing(str, opts);
 
         const strInfo = {
-            id: i,
+            id: session + '_' + i,
+            session: session,
+            iteration: i,
+            time: moment().format('HH:mm:ss'),
             depth: depth,
             category: category,
             question: question,
             originalStr: str,
             cleanedStr: cleanStr,
             tokens: tokens,
-            time: moment().format('HH:mm:ss'),
             stats: {
                 age: age(str, opts).AGE,
                 gender: gender(str, opts).GENDER,
@@ -867,7 +891,6 @@ module.exports = require('./lib/coach.js');
         strInfo.pos.entities = str.topics().out('array');
         strInfo.pos.sentences = str.sentences().out('array');
         strInfo.pos.adjectives = str.adjectives().out('array');
-        strInfo.nlp = str;
 
         return strInfo;
     }
