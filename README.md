@@ -67,10 +67,6 @@ Dumps all the session data into an object which looks like this:
                 // !these stats are just for this one iteration!
                 "age":92.2602,  // age characteristics of the string
                 "gender":60.9501,   // gender characteristics of the string
-                "darktriad":0.632,  // overall dark-triad score
-                "psychopathy":0.4944,
-                "narcissism":0.7088,
-                "machiavellianism":0.5967,
                 "past":-0.8187, // degree to which the string is past focused
                 "present":-0.0608, // degree to which the string is present focused
                 "future":-0.1899, // degree to which the string is future focused
@@ -99,10 +95,6 @@ Dumps all the session data into an object which looks like this:
     // unlike the stats above, these below are averages for the entire session
     "age":92.2602,
     "gender":60.9501,
-    "darktriad":0.632,
-    "psychopathy":0.4944,
-    "narcissism":0.7088,
-    "machiavellianism":0.5967,
     "past":-0.8187,
     "present":-0.0608,
     "future":-0.1899,

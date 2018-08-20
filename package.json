@@ -1,6 +1,6 @@
 {
   "name": "cleancoach",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A clean language coach in ES6.",
   "main": "index.js",
   "keywords": [
@@ -23,7 +23,6 @@
   "dependencies": {
     "affectimo": "^3.1.0",
     "compromise": "^11.12.0",
-    "darktriad": "^3.1.1",
     "moment": "^2.22.2",
     "optimismo": "^0.4.1",
     "predictage": "^3.1.0",
