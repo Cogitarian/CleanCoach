@@ -1,6 +1,6 @@
 {
   "name": "cleancoach",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A clean language coach in ES6.",
   "main": "index.js",
   "keywords": [

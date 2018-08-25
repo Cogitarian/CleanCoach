@@ -284,7 +284,7 @@ module.exports = require('./lib/coach.js');
 
 (function() {
     'use strict';
-    const version = '0.1.4';
+    const version = '0.1.5';
     const functions = require('./functions.js');
     const language = require('./language.js');
     const moment = require('moment');
@@ -787,6 +787,8 @@ module.exports = require('./lib/coach.js');
         let reflection = 'and ';
         // previous word storage
         let prev = '';
+        // get our stored pronouns
+        let pronouns = Object.keys(language.coachPronouns);
         // main loop
         for (let word of tokens) {
             // if not a word, skip
@@ -795,10 +797,6 @@ module.exports = require('./lib/coach.js');
                 prev = word;
                 continue;
             }
-            // handle 'I'
-            if (word === 'i') {
-                word = 'you';
-            } else
             // handle you = I or me
             if (word === 'you') {
                 if (language.coachPrepositions.indexOf(prev) >= 0) {
@@ -813,11 +811,8 @@ module.exports = require('./lib/coach.js');
                 word = 'you'; // we?
             } else {
                 // handle other pronouns
-                for (let p in language.coachPronouns) {
-                    if (language.coachPronouns.hasOwnProperty(p) && 
-                            word === p) {
-                        word = language.coachPronouns[p];
-                    }
+                if (pronouns.indexOf(word) > -1) {
+                    word = language.coachPronouns[word];
                 }
             }
             prev = word;
@@ -954,6 +949,7 @@ exports.coachPronouns = {
     'yours': 'mine',
     'you\'d': 'I\'d',
     'you\'re': 'I\'m',
+    'i': 'you',
 };
 
 exports.coachPrepositions = [
