@@ -1,6 +1,6 @@
 {
   "name": "cleancoach",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A clean language coach in ES6.",
   "main": "index.js",
   "keywords": [
@@ -23,7 +23,6 @@
   "dependencies": {
     "affectimo": "^3.1.0",
     "compromise": "^11.12.0",
-    "moment": "^2.22.2",
     "optimismo": "^0.4.1",
     "predictage": "^3.1.0",
     "predictgender": "^3.0.0",
@@ -34,7 +33,7 @@
     "cleancoach": "./cli.js"
   },
   "scripts": {
-    "build": "browserify index.js -s Coach -o ./dist/coach.js",
+    "build": "browserify index.js -s Coach | uglifyjs -m -c booleans,loops,unused,hoist_funs,if_return,join_vars,comparisons,conditionals,evaluate,sequences,dead_code,drop_debugger=true,ecma=6 > ./dist/coach.min.js",
     "test": "node cli.js"
   }
 }

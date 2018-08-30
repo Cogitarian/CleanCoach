@@ -15,15 +15,17 @@ console.log(response);
 The primary ways of interacting with CleanCoach are:
 ```javascript
 const clive = new Coach("Clive"); // initialise a new coach with a name
-clive.getResponse(str); // get a clean response to a users input string
+clive.getResponse(str, sel); // get a clean response to a users input string
 clive.getProfile(); // returns an object with many psychometrics about the session so for
 clive.newSession(false); // begins a new session
 clive.reset(); // resets the coach to a brand new state
 ```
 
-### getResponse(str)
+### getResponse(str, sel)
 
-Takes an input string and generates a response. getResponse is promise based so you can use .then and .catch etc.
+Takes an input string (str) and generates a response. getResponse is promise based so you can use .then and .catch etc.
+
+getResponse can also take an optional 'sel' argument, which is another string. If the 'sel' string is present, the 'str' arugment will be used to formulate the reflective statement, and the 'sel' string will be used only to formulate the question. This can be useful for taking a user selected chunk of the 'str' string to use as focus for question creation.
 
 The response is an object with the following structure:
 

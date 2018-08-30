@@ -6,6 +6,7 @@ node_modules/
 *.json
 !package.json
 !package-lock.json
+.Rhistory
 
 ### Ignore OS X Files
 *.DS_Store
